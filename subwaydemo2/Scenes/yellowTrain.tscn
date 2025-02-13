@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://bfo6nudxjfim2"]
+
+[ext_resource type="PackedScene" uid="uid://dcm062j58wkby" path="res://3D Models/YellowTrain.glb" id="2_f7uy0"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hjqp7"]
+size = Vector3(1, 1.69293, 3.0943)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_us7gt"]
+size = Vector3(1, 0.892577, 1.75383)
+
+[node name="yellowTrain" type="RigidBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.824554, -0.014801)
+shape = SubResource("BoxShape3D_hjqp7")
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("2_f7uy0")]
+transform = Transform3D(-0.06, 0, 5.24537e-09, 0, 0.06, 0, -5.24537e-09, 0, -0.06, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.427735, 0.201159)
+shape = SubResource("BoxShape3D_us7gt")

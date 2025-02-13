@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://bdxkk1mcay7pf"]
+
+[ext_resource type="PackedScene" uid="uid://c1k2obtvcvdjf" path="res://3D Models/CargoTrain.glb" id="2_0mg7g"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m4ri7"]
+size = Vector3(1, 1.65558, 2.95648)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6ox15"]
+size = Vector3(1, 1.6792, 2.94934)
+
+[node name="CargoTrain" type="RigidBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.021, 0.841448, 0.0531775)
+shape = SubResource("BoxShape3D_m4ri7")
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("2_0mg7g")]
+transform = Transform3D(0.02, 0, 0, 0, 0.02, 0, 0, 0, 0.02, -1.718, 0, -1.424)
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.832031, 0.0494998)
+shape = SubResource("BoxShape3D_6ox15")

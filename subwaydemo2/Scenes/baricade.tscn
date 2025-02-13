@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://ch266moqu421g"]
+
+[ext_resource type="PackedScene" uid="uid://c3vkv6w8xbshp" path="res://3D Models/blocker_jump.glb" id="2_2c1uk"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m4ri7"]
+size = Vector3(0.92091, 0.647782, 0.712509)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6ox15"]
+size = Vector3(0.927734, 0.662354, 0.703384)
+
+[node name="CargoTrain" type="RigidBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00658986, 0.319315, -0.0353924)
+shape = SubResource("BoxShape3D_m4ri7")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00292969, 0.323608, -0.0319135)
+shape = SubResource("BoxShape3D_6ox15")
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("2_2c1uk")]
+transform = Transform3D(-0.05, 0, 4.37114e-09, 0, 0.05, 0, -4.37114e-09, 0, -0.05, 0, 0, 0)

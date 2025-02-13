@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://d4aublok82cam"]
+
+[ext_resource type="PackedScene" uid="uid://dtxhn2ekq7qxg" path="res://Scenes/animation.tscn" id="1_erga4"]
+
+[node name="Player" type="RigidBody3D"]
+
+[node name="animation" parent="." instance=ExtResource("1_erga4")]
+transform = Transform3D(-0.45, 0, 3.93403e-08, 0, 0.45, 0, -3.93403e-08, 0, -0.45, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.423181, -0.0615284)
