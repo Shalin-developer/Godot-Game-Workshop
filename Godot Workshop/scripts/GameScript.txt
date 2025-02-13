@@ -1,0 +1,92 @@
+extends Node3D
+
+# Path to the scene to spawn
+@export var object_to_spawn_path: String = "res://Scenes/ground.tscn"
+
+# Timer interval for spawning objects after the initial spawn
+@export var spawn_interval: float = 2.0
+
+# Offset to be added to the Marker3D position for subsequent spawns
+@export var spawn_offset: Vector3 = Vector3(0, 0, -19.7)
+
+# Number of initial objects to spawn
+@export var initial_spawn_count: int = 5
+
+# Reference to the last spawned object
+var last_spawned_object: Node3D = null
+
+# Timer to handle delayed spawning of objects after 20 seconds
+var spawn_delay_timer: Timer = null
+
+func _ready() -> void:
+	# Spawn the initial set of objects
+	for i in range(initial_spawn_count):
+		var spawn_position: Vector3
+		match i:
+			0:
+				spawn_position = Vector3(0, 0.542, 0)  # First object
+			1:
+				spawn_position = Vector3(0, 0.542, -37.61)  # Second object
+			2:
+				spawn_position = Vector3(0, 0.542, -75.22)  # Third object
+			3:
+				spawn_position = Vector3(0, 0.542, -112.83)  # Fourth object
+			4:
+				spawn_position = Vector3(0, 0.542, -150.44)  # Fifth object
+		spawn_object(spawn_position)
+
+	# Set up a timer for delayed spawning of new objects after 20 seconds
+	spawn_delay_timer = Timer.new()
+	spawn_delay_timer.wait_time = 12.0  # Wait for 20 seconds
+	spawn_delay_timer.one_shot = true
+	spawn_delay_timer.connect("timeout", Callable(self, "_on_spawn_delay_timeout"))
+	add_child(spawn_delay_timer)
+	spawn_delay_timer.start()
+
+func _on_spawn_delay_timeout() -> void:
+	# After 20 seconds, start periodic spawning of objects
+	var spawn_timer = Timer.new()
+	spawn_timer.wait_time = spawn_interval  # Spawn every `spawn_interval` seconds
+	spawn_timer.one_shot = false  # Repeating timer
+	spawn_timer.connect("timeout", Callable(self, "_on_spawn_timer_timeout"))
+	add_child(spawn_timer)
+	spawn_timer.start()
+
+func _on_spawn_timer_timeout() -> void:
+	# Spawn new objects after the initial set
+	if last_spawned_object:
+		var end_marker: Marker3D = last_spawned_object.get_node("EndPoint")
+		if end_marker:
+			# Calculate the next spawn position using the marker position plus offset
+			var spawn_position = end_marker.global_transform.origin + spawn_offset
+			spawn_position.y = 0.542  # Ensure y-axis remains 0.542
+			spawn_object(spawn_position)
+		else:
+			push_error("EndPoint Marker3D not found in the last spawned object!")
+
+func spawn_object(position: Vector3) -> void:
+	var object_scene: PackedScene = load(object_to_spawn_path)
+	if object_scene:
+		# Instantiate the object
+		var instance = object_scene.instantiate()
+		if instance:
+			# Add the instance to the scene tree first
+			add_child(instance)
+			# Set the spawn position after the instance is added to the tree
+			instance.global_transform.origin = position
+			# Update the reference to the last spawned object
+			last_spawned_object = instance
+			print("Object spawned successfully at position: ", position)
+		else:
+			push_error("Failed to instantiate object!")
+	else:
+		push_error("Failed to load object scene at path: %s" % object_to_spawn_path)
+
+
+func _on_area_3d_area_entered(area: Area3D) -> void:
+	print("Collided")
+	call_deferred("_change_scene_to_end_menu")
+
+func _change_scene_to_end_menu() -> void:
+	# Change the scene outside of the physics callback
+	get_tree().change_scene_to_file("res://Scenes/end_menu.tscn")

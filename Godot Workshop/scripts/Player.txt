@@ -1,0 +1,110 @@
+extends RigidBody3D
+
+@export var positions: Array[float] = [-1.269, 0.1, 1.556]  # Allowed X positions
+@export var move_speed: float = 5.0  # Speed of movement
+@export var jump_height: float = 1.1  # Maximum jump height
+@export var jump_duration: float = 1  # Time to reach peak jump height
+@export var ground_y: float = 1.1  # Ground level at y = 0.79
+
+var target_index: int = 1  # Start at the middle position
+var is_jumping: bool = false  # Track if the player is jumping
+var is_rolling: bool = false  # Track if the player is rolling
+var jump_time: float = 0.0  # Track jump progress
+var anim_tree: AnimationTree  # Store reference to the AnimationTree
+var jump_animation_time: float = 0.0  # Track time since jump animation started
+var is_jump_animation_playing: bool = false  # Track if jump animation is active
+var roll_animation_time: float = 0.0  # Track time since roll animation started
+var is_roll_animation_playing: bool = false  # Track if roll animation is active
+
+func _ready():
+	# Find the RealFinal node
+	var real_final = $animation  # Assuming RealFinal is a direct child of the Player node
+	if real_final:
+		# Find the AnimationTree node inside RealFinal
+		anim_tree = real_final.get_node("AnimationTree") as AnimationTree
+		if anim_tree:
+			anim_tree.active = true
+			print("AnimationTree is active!")
+			# Trigger the "Run" animation
+			anim_tree.set("parameters/Run/active", true)
+		else:
+			print("AnimationTree not found inside RealFinal!")
+	else:
+		print("RealFinal node not found!")
+	
+
+func _input(event):
+	if event.is_action_pressed("move_left"):
+		move(-1)
+	elif event.is_action_pressed("move_right"):
+		move(1)
+	elif event.is_action_pressed("jump") and not is_jumping:
+		jump()
+	elif event.is_action_pressed("roll") and not is_rolling:  # Handle roll input
+		roll()
+
+func move(direction: int):
+	var new_index = target_index + direction
+	if new_index >= 0 and new_index < positions.size():
+		target_index = new_index
+
+func jump():
+	is_jumping = true
+	jump_time = 0.0
+	
+	# Trigger the "Jump" animation
+	if anim_tree:
+		anim_tree.set("parameters/conditions/canJump", true)  # Set the condition for the Jump animation
+		print("Can Jump condition set to true!")
+		is_jump_animation_playing = true
+		jump_animation_time = 0.0  # Reset the jump animation timer
+
+func roll():
+	is_rolling = true
+	
+	# Trigger the "Roll" animation
+	if anim_tree:
+		anim_tree.set("parameters/conditions/canRoll", true)  # Set the condition for the Roll animation
+		print("Can Roll condition set to true!")
+		is_roll_animation_playing = true
+		roll_animation_time = 0.0  # Reset the roll animation timer
+
+func _process(delta):
+	# Smoothly move to the target X position
+	var target_position = Vector3(positions[target_index], global_transform.origin.y, global_transform.origin.z)
+	global_transform.origin = global_transform.origin.lerp(target_position, move_speed * delta)
+
+	# Handle jump animation manually
+	if is_jumping:
+		jump_time += delta
+		var jump_progress = jump_time / (jump_duration / 2)  # Normalize progress (0 to 1 for up and down)
+		
+		if jump_progress < 1.0:
+			# Going up
+			global_transform.origin.y = lerp(ground_y, ground_y + jump_height, jump_progress)
+		else:
+			# Going down
+			global_transform.origin.y = lerp(ground_y + jump_height, ground_y, jump_progress - 1.0)
+		
+		if jump_time >= jump_duration:
+			global_transform.origin.y = ground_y  # Ensure precise landing
+			is_jumping = false
+
+	# Handle jump animation timing
+	if is_jump_animation_playing:
+		jump_animation_time += delta
+		if jump_animation_time >= 0.8:  # After 1 second
+			if anim_tree:
+				anim_tree.set("parameters/conditions/canJump", false)  # Reset the condition
+				print("Can Jump condition set to false!")
+			is_jump_animation_playing = false
+
+	# Handle roll animation timing
+	if is_roll_animation_playing:
+		roll_animation_time += delta
+		if roll_animation_time >= 1.0:  # After 1 second (adjust as needed)
+			if anim_tree:
+				anim_tree.set("parameters/conditions/canRoll", false)  # Reset the condition
+				print("Can Roll condition set to false!")
+			is_roll_animation_playing = false
+			is_rolling = false
